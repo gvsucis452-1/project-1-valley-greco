@@ -108,22 +108,18 @@ int main(int argc, char *argv[]) {
 
             printf("Node %d sees empty message...\n", node_index);
 
-            if (node_index == 0) {
-
-                printf("Enter Message: ");
-                fgets(message_input, sizeof(message_input), stdin);
-                message_input[strcspn(message_input, "\n")] = '\0';
-
-                printf("Enter Destination Node (0-%d): ", k-1);
-                scanf("%d", &recipient);
-                getchar();
-
-                apl.recipient = recipient;
-                strcpy(apl.message, message_input);
-            }
         }
+        if (node_index == 0) {
+            printf("Enter Message: ");
+            fgets(message_input, sizeof(message_input), stdin);
+            message_input[strcspn(message_input, "\n")] = '\0';
+            printf("Enter Destination Node (0-%d): ", k-1);
+            scanf("%d", &recipient);
+            getchar();
 
-
+            apl.recipient = recipient;
+            strcpy(apl.message, message_input);
+        }
 
         write(pipes[next_node][1], &apl, sizeof(apl));
 
