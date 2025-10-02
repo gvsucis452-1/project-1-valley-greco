@@ -11,11 +11,29 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
+#include <sys/wait.h>
 
 struct apple {
     int recipient;
     char message[250];
+    int terminate;
 };
+
+pid_t *children_global;
+int k_global = 0;
+
+void handle_sigint(int sig_num){
+    printf(" Received. Shutting down\n");
+    for(int i =1; i<k_global;i++){
+        printf("killing node %d\n",i);
+        kill(children_global[i],SIGTERM);
+    }
+    wait(NULL);
+    printf("Children are terminated\n");
+    exit(0);
+}
+
 
 int main(int argc, char *argv[]) {
     int message_size = 300;
@@ -44,8 +62,8 @@ int main(int argc, char *argv[]) {
     struct apple apl;
     char message_input[message_size];
     int recipient;
-
-
+    
+    pid_t children[k];
     for (node_index=1;node_index<k;node_index++){
         if( (pid = fork()) < 0){
             perror("Fork Failure");
@@ -53,7 +71,10 @@ int main(int argc, char *argv[]) {
         }else if(pid ==0){
             // Child should immediatly break out of the loop to prevent forking
             break;
+        }else {
+             children[node_index] = pid;
         }
+
     }
 
     node_index = node_index % k;
@@ -70,6 +91,9 @@ int main(int argc, char *argv[]) {
     }
     
     if (pid != 0) {
+        children_global = children;
+        k_global = k;
+        signal(SIGINT, handle_sigint);
         sleep(1);   // parent waits for process creation
 
         // initial prompt for user input to start loop
@@ -92,7 +116,7 @@ int main(int argc, char *argv[]) {
     // main loop
 
     while(1) {
-
+        close(pipes[node_index][1]);
         read(pipes[node_index][0], &apl, sizeof(apl));
         
         if (strlen(apl.message) > 0) {
@@ -120,7 +144,7 @@ int main(int argc, char *argv[]) {
             apl.recipient = recipient;
             strcpy(apl.message, message_input);
         }
-
+        close(pipes[next_node][0]);
         write(pipes[next_node][1], &apl, sizeof(apl));
 
     }
