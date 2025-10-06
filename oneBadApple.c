@@ -55,6 +55,9 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
     }
+    
+    int ready_pipe[2];
+    pipe(ready_pipe);
 
     int node_index; //Keep track of the nodes index for the pipes array
     pid_t pid;
@@ -69,7 +72,9 @@ int main(int argc, char *argv[]) {
             perror("Fork Failure");
             exit(1);
         }else if(pid ==0){
-            // Child should immediatly break out of the loop to prevent forking
+            close(ready_pipe[0]);
+            write(ready_pipe[1], "R", 1);
+            close(ready_pipe[1]);
             break;
         }else {
              children[node_index] = pid;
@@ -91,10 +96,16 @@ int main(int argc, char *argv[]) {
     }
     
     if (pid != 0) {
+        close(ready_pipe[1]);
+        char buffer;
+        for(int i=1;i<k;i++){
+            read(ready_pipe[0], &buffer,1);
+        }
+        close(ready_pipe[0]);
+
         children_global = children;
         k_global = k;
         signal(SIGINT, handle_sigint);
-        sleep(1);   // parent waits for process creation
 
         // initial prompt for user input to start loop
 
@@ -116,7 +127,6 @@ int main(int argc, char *argv[]) {
     // main loop
 
     while(1) {
-        close(pipes[node_index][1]);
         read(pipes[node_index][0], &apl, sizeof(apl));
         
         if (strlen(apl.message) > 0) {
@@ -144,7 +154,6 @@ int main(int argc, char *argv[]) {
             apl.recipient = recipient;
             strcpy(apl.message, message_input);
         }
-        close(pipes[next_node][0]);
         write(pipes[next_node][1], &apl, sizeof(apl));
 
     }
