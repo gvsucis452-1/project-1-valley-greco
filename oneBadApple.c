@@ -29,7 +29,17 @@ void handle_sigint(int sig_num){
         printf("killing node %d\n",i);
         kill(children_global[i],SIGTERM);
     }
-    wait(NULL);
+
+    for(int i=1; i<k_global;i++){
+        int status;
+        pid_t pid = waitpid(children_global[i], &status, 0);
+        if (pid > 0){
+            printf("Node %d exited\n", i);
+        }else{
+            perror("Error occured while waiting for child");
+            exit(1);
+        }
+    }
     printf("Children are terminated\n");
     exit(0);
 }
