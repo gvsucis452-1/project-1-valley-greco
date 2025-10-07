@@ -123,9 +123,16 @@ int main(int argc, char *argv[]) {
         fgets(message_input, sizeof(message_input), stdin);
         message_input[strcspn(message_input, "\n")] = '\0';
 
-        printf("Enter Destination Node (0-%d): ", k-1);
-        scanf("%d", &recipient);
-        getchar();
+        while (1) {
+            printf("Enter Destination Node (0-%d): ", k-1);
+            scanf("%d", &recipient);
+            getchar();
+            if ((recipient > k-1) || (recipient < 0)) {
+                printf("Invalid node index\n");
+            } else {
+                break;
+            }
+        }
 
         apl.recipient = recipient;
         strcpy(apl.message, message_input);
@@ -157,9 +164,17 @@ int main(int argc, char *argv[]) {
             printf("Enter Message: ");
             fgets(message_input, sizeof(message_input), stdin);
             message_input[strcspn(message_input, "\n")] = '\0';
-            printf("Enter Destination Node (0-%d): ", k-1);
-            scanf("%d", &recipient);
-            getchar();
+            
+            while (1) {
+                printf("Enter Destination Node (0-%d): ", k-1);
+                scanf("%d", &recipient);
+                getchar();
+                if ((recipient > k-1) || (recipient < 0)) {
+                    printf("Invalid node index\n");
+                } else {
+                    break;
+                }
+            }
 
             apl.recipient = recipient;
             strcpy(apl.message, message_input);
