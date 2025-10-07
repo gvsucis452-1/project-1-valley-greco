@@ -11,10 +11,11 @@ At the beginning of the program, we prompt the user for how many processes shoul
 1. Create an array of `k` pipes
 2. Setup variables `node_index`, `pid`, and our structure to hold the message and recipient `struct apple apl`
 3. Use `fork()` to create `k-1` processes from the parent process
-4. Each process then prints it's number, so the user can see the processes are successfully created
-5. Within each process, close all unused pipe ends, each process only needs one read end (from the previous process) and one write end (to the next process)
-6. In the parent process, add a 1 bit buffer to each pipe and a signal to handle the `^C` exit signal
-7. Prompt the user for the first message and recipient
+4. Each child then writes 1 bit to the `ready_pipe` to signal to the parent that they are done building
+5. Each process then prints it's number, so the user can see the processes are successfully created
+6. Within each process, close all unused pipe ends, each process only needs one read end (from the previous process) and one write end (to the next process)
+7. In the parent process, read `k-1` bits from the `ready_pipe` to ensure all pipes are done building and a signal to handle the `^C` exit signal
+8. Prompt the user for the first message and recipient
 
 ## Enter Loop
 
