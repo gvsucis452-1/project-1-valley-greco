@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     
     //Create an array that holds all the pipes
     //Node i will read from index i and write to index (i+1)%k
-    int pipes[k][2];
+    int pipes[k][2];      // zk Modern C is so much nicer than what I had growing up :)
     for(int i=0;i<k;i++){
         if(pipe(pipes[i]) == -1){
             perror("Error while creating a pipe\n");
@@ -177,6 +177,7 @@ int main(int argc, char *argv[]) {
             }
 
             apl.recipient = recipient;
+            // zk In general, strncpy is safer.
             strcpy(apl.message, message_input);
         }
         write(pipes[next_node][1], &apl, sizeof(apl));
